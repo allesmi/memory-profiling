@@ -37,11 +37,12 @@ class BusyComponentExperiment {
     }
 
     run() {
-        let component = new BusyComponent(this._div);
+        this._component = new BusyComponent(this._div);
     }
 
     tearDown() {
         this._div.innerHTML = '';
+        this._component = null;
     }
 }
 
