@@ -1,6 +1,20 @@
 import {
     BusyComponent
 } from './busy.component.js';
+import {
+    NestedComponent
+} from './nested.component.js';
+
+function humanize(bytes) {
+    const prefixes = ['GB', 'MB', 'KB', 'B'];
+    let prefix = prefixes.length - 1;
+    while (bytes > 1024 && prefix >= 0) {
+        bytes = bytes / 1024;
+        prefix -= 1;
+    }
+
+    return `${bytes.toFixed(2)} ${prefixes[prefix]}`;
+}
 
 function copyMemoryObject({
     jsHeapSizeLimit,
@@ -33,21 +47,50 @@ class BusyComponentExperiment {
 
 class NestedComponentExperiment {
     constructor() {
+        let main = document.querySelector('main');
+        main.innerHTML = ''
+        this._div = document.createElement('div');
+        main.appendChild(this._div);
+    }
 
+    run() {
+        this._component = new NestedComponent(this._div, 1000);
+    }
+
+    tearDown() {
+        this._div.innerHTML = '';
+        this._component = null;
     }
 }
 
 function runExperiment(experimentClass) {
+    console.log('Use the debugger to set a breakpoint on this line and then ' +
+        'trigger a GC manually using the DevTools');
+
     const memoryBefore = copyMemoryObject(performance.memory);
+    console.log('The heap size limit is', humanize(memoryBefore
+        .jsHeapSizeLimit));
     const experiment = new experimentClass();
     experiment.run();
     const memoryPeak = copyMemoryObject(performance.memory);
     experiment.tearDown();
     const memoryAfter = copyMemoryObject(performance.memory);
 
-    console.log('memory before the experiment', memoryBefore);
-    console.log('memory at peak', memoryPeak);
-    console.log('memory after the experiment', memoryAfter);
+    const totalHeapSizeGrowth = memoryPeak.totalJSHeapSize - memoryBefore
+        .totalJSHeapSize;
+    const usedHeapSizeGrowth = memoryPeak.usedJSHeapSize - memoryBefore
+        .usedJSHeapSize;
+
+    console.log('total heap size grew by', humanize(totalHeapSizeGrowth));
+    console.log('used heap size grew by', humanize(usedHeapSizeGrowth));
+
+    console.log('Use the debugger to set a breakpoint on this line and then ' +
+        'trigger a GC manually using the DevTools');
+
+    const memoryAfterGC = copyMemoryObject(performance.memory);
+    const collectedMemorySize = memoryPeak.usedJSHeapSize - memoryAfterGC
+        .usedJSHeapSize;
+    console.log('Memory collected during GC:', humanize(collectedMemorySize));
 }
 
 let btn1 = document.querySelector('#btn-1');
