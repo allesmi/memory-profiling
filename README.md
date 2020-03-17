@@ -12,6 +12,8 @@ An object on the heap is reachable if it is either referenced by a global variab
 If and when an unreachable object is collected is implementation-dependent.
 The runtime provides no guarantees.
 
+For more information see [MDN: JavaScript: Memory Management](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_Management).
+
 ## Memory Profiling in Google Chrome
 
 JavaScript has read-only access to heap sizes using the `performance.memory` object (Google Chrome only, see [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory)).
